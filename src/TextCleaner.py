@@ -82,3 +82,4 @@ class TextCleaner():
         one_space_separated_tweet = ' '.join([word for word in words_greater_than_two_char.split()])
 
         return one_space_separated_tweet
+
