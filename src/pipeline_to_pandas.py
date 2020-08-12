@@ -40,7 +40,7 @@ class pipelineToPandas():
                 id AS tweet_id,
                 state,
                 search_term_key,
-                created_at AS tweet_time,
+                created_at AS tweet_date_created,
                 text AS tweet_text,
                 display_text_range AS tweet_text_range,
                 source,
@@ -71,6 +71,7 @@ class pipelineToPandas():
             dropping duplicate rows (based on tweet_id)
             eliminated mentions from tweet text
             format source from html to iPhone, Android, Web, Other
+            format as datetime
         '''
         if all:
             # dropping duplicates
@@ -85,7 +86,20 @@ class pipelineToPandas():
             self.df_all.drop(['tweet_text', 'tweet_text_range'], axis=1, inplace=True)  
 
             # formatting source
-            self.df_all['source'].apply(lambda x: BeautifulSoup(x).find('a').getText())
+            self.df_all['source_text'] = self.df_all['source'].apply(lambda x: BeautifulSoup(x).find('a').getText())
+            self.df_all.drop('source', axis=1, inplace=True)
+            source_class_dict = {'Twitter for iPhone': 'iPhone', 'Twitter for Android': 'Android',
+                     'Twitter Web App': 'Web', 'Twitter for iPad': 'iPad'}
+            self.df_all['source_text'] = self.df_all['source_text'].replace(source_class_dict)
+            self.df_all['source_text'].where(
+                self.df_all['source_text'].apply(lambda x: x in source_class_dict.values()),
+                'Other',
+                inplace=True
+            )
+
+            # format datetime cols
+            self.df_all['tweet_date_created'] = pd.to_datetime(self.df_all['tweet_date_created'])
+            self.df_all['user_date_created'] = pd.to_datetime(self.df_all['user_date_created'])
 
     def _format_text_range(self, raw_range):
         '''
@@ -120,3 +134,5 @@ if __name__ == "__main__":
     print('hi')
     pipeline = pipelineToPandas()
     pipeline.load_multiple_files()
+    pipeline.clean_df()
+    pipeline.save_to_csv('all_clean.csv')
