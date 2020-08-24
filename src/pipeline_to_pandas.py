@@ -56,6 +56,9 @@ class pipelineToPandas():
         self.pandas_df = new_spark_df.toPandas()
 
     def load_multiple_files(self, all=True):
+        '''
+        
+        '''
         if all:
             for state_key in self.state_dict.keys():
                 for term_key in self.term_dict.keys():
