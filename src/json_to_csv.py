@@ -42,8 +42,6 @@ class csvToDataframePipeline():
     Expand raw csv to relevant fields
     '''
 
-
-
     def _load_csv(self, raw_csv_file):
         csv_file_path = f'../data/{raw_csv_file}'
         self.raw_df = pd.read_csv(csv_file_path)
